@@ -1,11 +1,61 @@
 package com.example.smartfinance
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.example.smartfinance.ui.navigation.NavGraph
+import com.example.smartfinance.ui.theme.SmartFinanceTheme
+import com.example.smartfinance.ui.viewmodel.HomeViewModel
+import com.example.smartfinance.ui.viewmodel.TransactionViewModel
 
-class MainActivity : AppCompatActivity() {
+/**
+ * MainActivity - ulazna tačka UI-a
+ */
+class MainActivity : ComponentActivity() {
+
+    // ViewModels sa factory pattern-om
+    private val homeViewModel: HomeViewModel by viewModels {
+        val app = application as SmartFinanceApplication
+        ViewModelFactory(
+            app.transactionRepository,
+            app.categoryRepository,
+            app.goalRepository
+        )
+    }
+
+    private val transactionViewModel: TransactionViewModel by viewModels {
+        val app = application as SmartFinanceApplication
+        ViewModelFactory(
+            app.transactionRepository,
+            app.categoryRepository,
+            app.goalRepository
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        setContent {
+            SmartFinanceTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
+
+                    NavGraph(
+                        navController = navController,
+                        homeViewModel = homeViewModel,
+                        transactionViewModel = transactionViewModel
+                    )
+                }
+            }
+        }
     }
 }
