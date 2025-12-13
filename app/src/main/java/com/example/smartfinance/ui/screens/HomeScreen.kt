@@ -27,6 +27,8 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+import com.example.smartfinance.ui.components.BottomNavBar
+
 /**
  * Home/Dashboard ekran - glavni ekran aplikacije
  * Prikazuje balans, poslednje transakcije, i quick actions
@@ -59,6 +61,7 @@ fun HomeScreen(
                 )
             )
         },
+        bottomBar = { BottomNavBar(navController = navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(Screen.AddTransaction.route) },

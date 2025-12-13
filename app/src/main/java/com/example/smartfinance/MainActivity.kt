@@ -12,14 +12,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.smartfinance.ui.navigation.NavGraph
 import com.example.smartfinance.ui.theme.SmartFinanceTheme
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
+import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
 
-/**
- * MainActivity - ulazna tačka UI-a
- */
 class MainActivity : ComponentActivity() {
 
-    // ViewModels sa factory pattern-om
     private val homeViewModel: HomeViewModel by viewModels {
         val app = application as SmartFinanceApplication
         ViewModelFactory(
@@ -30,6 +27,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private val transactionViewModel: TransactionViewModel by viewModels {
+        val app = application as SmartFinanceApplication
+        ViewModelFactory(
+            app.transactionRepository,
+            app.categoryRepository,
+            app.goalRepository
+        )
+    }
+
+    private val statisticsViewModel: StatisticsViewModel by viewModels {
         val app = application as SmartFinanceApplication
         ViewModelFactory(
             app.transactionRepository,
@@ -52,7 +58,8 @@ class MainActivity : ComponentActivity() {
                     NavGraph(
                         navController = navController,
                         homeViewModel = homeViewModel,
-                        transactionViewModel = transactionViewModel
+                        transactionViewModel = transactionViewModel,
+                        statisticsViewModel = statisticsViewModel
                     )
                 }
             }

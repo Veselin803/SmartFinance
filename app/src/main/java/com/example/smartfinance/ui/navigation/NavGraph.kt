@@ -4,26 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.smartfinance.ui.screens.HomeScreen
 import com.example.smartfinance.ui.screens.AddTransactionScreen
+import com.example.smartfinance.ui.screens.HomeScreen
+import com.example.smartfinance.ui.screens.StatisticsScreen
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
+import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
 
-/**
- * Glavni navigation graph za aplikaciju
- * Definiše sve rute i koji ekran se prikazuje
- */
 @Composable
 fun NavGraph(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
+    statisticsViewModel: StatisticsViewModel
 ) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
-        // Home/Dashboard ekran
         composable(route = Screen.Home.route) {
             HomeScreen(
                 navController = navController,
@@ -31,7 +29,6 @@ fun NavGraph(
             )
         }
 
-        // Dodavanje transakcije ekran
         composable(route = Screen.AddTransaction.route) {
             AddTransactionScreen(
                 navController = navController,
@@ -39,9 +36,12 @@ fun NavGraph(
             )
         }
 
-        // Ostali ekrani - dodaćemo kasnije
-        // composable(route = Screen.Transactions.route) { ... }
-        // composable(route = Screen.Statistics.route) { ... }
-        // composable(route = Screen.Goals.route) { ... }
+
+        composable(route = Screen.Statistics.route) {
+            StatisticsScreen(
+                navController = navController,
+                viewModel = statisticsViewModel
+            )
+        }
     }
 }
