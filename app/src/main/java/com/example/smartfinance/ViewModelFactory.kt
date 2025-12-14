@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.smartfinance.data.repository.CategoryRepository
 import com.example.smartfinance.data.repository.GoalRepository
 import com.example.smartfinance.data.repository.TransactionRepository
+import com.example.smartfinance.ui.viewmodel.GoalViewModel
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
@@ -28,6 +29,10 @@ class ViewModelFactory(
             modelClass.isAssignableFrom(StatisticsViewModel::class.java) -> {
                 @Suppress("UNCHECKED_CAST")
                 StatisticsViewModel(transactionRepository, categoryRepository) as T
+            }
+            modelClass.isAssignableFrom(GoalViewModel::class.java) -> {
+                @Suppress("UNCHECKED_CAST")
+                GoalViewModel(goalRepository) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

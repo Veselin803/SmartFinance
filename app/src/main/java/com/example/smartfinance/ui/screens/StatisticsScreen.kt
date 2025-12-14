@@ -22,6 +22,8 @@ import androidx.navigation.NavController
 import com.example.smartfinance.ui.theme.*
 import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 
+import com.example.smartfinance.ui.components.BottomNavBar
+
 /**
  * Statistics ekran - prikazuje grafikone i analize
  */
@@ -53,7 +55,8 @@ fun StatisticsScreen(
                     navigationIconContentColor = Color.White
                 )
             )
-        }
+        },
+        bottomBar = { BottomNavBar(navController = navController) },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

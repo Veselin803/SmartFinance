@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.smartfinance.ui.navigation.NavGraph
 import com.example.smartfinance.ui.theme.SmartFinanceTheme
+import com.example.smartfinance.ui.viewmodel.GoalViewModel
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
@@ -44,6 +45,16 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    // ← DODAJ GOAL VIEW MODEL
+    private val goalViewModel: GoalViewModel by viewModels {
+        val app = application as SmartFinanceApplication
+        ViewModelFactory(
+            app.transactionRepository,
+            app.categoryRepository,
+            app.goalRepository
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,7 +70,8 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         homeViewModel = homeViewModel,
                         transactionViewModel = transactionViewModel,
-                        statisticsViewModel = statisticsViewModel
+                        statisticsViewModel = statisticsViewModel,
+                        goalViewModel = goalViewModel
                     )
                 }
             }
