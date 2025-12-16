@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.smartfinance.data.model.Transaction
-import com.example.smartfinance.ui.navigation.Screen
+import Screen
 import com.example.smartfinance.ui.theme.ExpenseRed
 import com.example.smartfinance.ui.theme.IncomeGreen
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
@@ -55,9 +55,21 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
+                actions = {
+                    // Dev Settings Button (za dodavanje test podataka)
+                    IconButton(
+                        onClick = { navController.navigate(Screen.DevSettings.route) }
+                    ) {
+                        Text(
+                            text = "🛠",
+                            fontSize = 20.sp
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         },

@@ -4,10 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.smartfinance.ui.screens.AddTransactionScreen
-import com.example.smartfinance.ui.screens.GoalsScreen
-import com.example.smartfinance.ui.screens.HomeScreen
-import com.example.smartfinance.ui.screens.StatisticsScreen
+import com.example.smartfinance.ui.screens.*
 import com.example.smartfinance.ui.viewmodel.GoalViewModel
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
@@ -25,6 +22,9 @@ fun NavGraph(
         navController = navController,
         startDestination = Screen.Home.route
     ) {
+        composable(route = Screen.Splash.route) {
+            SplashScreen(navController = navController)
+        }
         composable(route = Screen.Home.route) {
             HomeScreen(
                 navController = navController,
@@ -50,6 +50,14 @@ fun NavGraph(
             GoalsScreen(
                 navController = navController,
                 viewModel = goalViewModel
+            )
+        }
+
+        composable(route = Screen.DevSettings.route) {
+            DevSettingsScreen(
+                navController = navController,
+                transactionViewModel = transactionViewModel,
+                goalViewModel = goalViewModel
             )
         }
     }
