@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.smartfinance.ui.viewmodel.GoalViewModel
-import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
 import com.example.smartfinance.util.SampleDataGenerator
 import kotlinx.coroutines.launch
@@ -54,7 +53,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun DevSettingsScreen(
     navController: NavController,
-    homeViewModel: HomeViewModel,
     transactionViewModel: TransactionViewModel,
     goalViewModel: GoalViewModel
 ) {

@@ -1,5 +1,10 @@
 package com.example.smartfinance.ui.screens
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +30,8 @@ import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+
+import androidx.compose.material3.TextButton
 
 import com.example.smartfinance.ui.components.BottomNavBar
 
@@ -110,6 +116,9 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
+                TextButton(onClick = { navController.navigate(Screen.Transactions.route) }) {
+                    Text("Vidi sve →")
+                }
             }
 
             // Transaction List
@@ -123,7 +132,15 @@ fun HomeScreen(
                     TransactionItem(
                         transaction = transaction,
                         categoryName = category?.name ?: "Nepoznato",
-                        categoryIcon = category?.icon ?: "📦"
+                        categoryIcon = category?.icon ?: "📦",
+                        onDelete = {
+                            // Implementacija brisanja - dodaj ViewModel metodu
+                            // Za sada samo placeholder
+                        },
+                        onEdit = {
+                            // Implementacija edit-a - navigacija na edit screen
+                            // Za sada placeholder
+                        }
                     )
                 }
             }
@@ -210,19 +227,25 @@ fun BalanceCard(
 /**
  * Item za pojedinačnu transakciju u listi
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionItem(
     transaction: Transaction,
     categoryName: String,
-    categoryIcon: String
+    categoryIcon: String,
+    onDelete: () -> Unit = {},
+    onEdit: () -> Unit = {}
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        onClick = { showMenu = true }  // ← Long press menu
     ) {
         Row(
             modifier = Modifier
@@ -271,6 +294,27 @@ fun TransactionItem(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (transaction.type == "income") IncomeGreen else ExpenseRed
+            )
+        }
+
+        // Dropdown Menu
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("✏ Izmeni") },
+                onClick = {
+                    showMenu = false
+                    onEdit()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("🗑 Obriši", color = MaterialTheme.colorScheme.error) },
+                onClick = {
+                    showMenu = false
+                    onDelete()
+                }
             )
         }
     }
