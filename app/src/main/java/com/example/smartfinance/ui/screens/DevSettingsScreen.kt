@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -157,7 +160,7 @@ fun DevSettingsScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Dodaj Sample Transakcije (18 kom)")
+                Text("➕ Dodaj Sample Transakcije (18 kom)")
             }
 
             // Add Sample Goals Button
@@ -171,16 +174,22 @@ fun DevSettingsScreen(
                                 deadline = goal.deadline,
                                 icon = goal.icon
                             )
-                            // Dodaj i trenutni iznos
-                            val addedGoal = goal.copy(currentAmount = goal.currentAmount)
-                            goalViewModel.updateGoalProgress(addedGoal, goal.currentAmount)
+                            // Ažuriraj sa trenutnim iznosom
+                            if (goal.currentAmount > 0) {
+                                kotlinx.coroutines.delay(100) // Mali delay da se cilj kreira
+                                val goals = allGoals
+                                val createdGoal = goals.lastOrNull { it.name == goal.name }
+                                createdGoal?.let {
+                                    goalViewModel.updateGoalProgress(it, goal.currentAmount)
+                                }
+                            }
                         }
                         showSuccessMessage = "✅ Dodato 4 cilja"
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Dodaj Sample Ciljeve (4 kom)")
+                Text("➕ Dodaj Sample Ciljeve (4 kom)")
             }
 
             Divider()
@@ -198,7 +207,8 @@ fun DevSettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error
-                )
+                ),
+                enabled = allTransactions.isNotEmpty() || allGoals.isNotEmpty()
             ) {
                 Icon(
                     imageVector = Icons.Default.DeleteForever,
@@ -206,7 +216,15 @@ fun DevSettingsScreen(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Obriši SVE Podatke")
+                Text("🗑 Obriši SVE Podatke")
+            }
+
+            if (allTransactions.isEmpty() && allGoals.isEmpty()) {
+                Text(
+                    text = "Nema podataka za brisanje",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
             }
 
             Divider()
@@ -232,7 +250,8 @@ fun DevSettingsScreen(
                                 "• Možeš ih obrisati pojedinačno ili sve odjednom\n" +
                                 "• Korisno za screenshot-ove u dokumentaciji\n" +
                                 "• Prikazuje raznolike kategorije i scenarije\n" +
-                                "• CRUD operacije dostupne na svim ekranima",
+                                "• CRUD operacije dostupne na svim ekranima\n" +
+                                "• Swipe udesno na transakciji za brisanje",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -245,12 +264,23 @@ fun DevSettingsScreen(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
                     )
                 ) {
-                    Text(
-                        text = message,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = { showSuccessMessage = null }) {
+                            Text("OK")
+                        }
+                    }
                 }
             }
         }
@@ -264,18 +294,69 @@ fun DevSettingsScreen(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(48.dp)
                 )
             },
-            title = { Text("Obriši SVE Podatke?") },
-            text = {
+            title = {
                 Text(
-                    "Ova akcija će TRAJNO obrisati:\n\n" +
-                            "• Sve transakcije (${allTransactions.size})\n" +
-                            "• Sve ciljeve (${allGoals.size})\n\n" +
-                            "Kategorije ostaju (default podaci).\n\n" +
-                            "Ovo se NE MOŽE poništiti!"
+                    "⚠ Obriši SVE Podatke?",
+                    color = MaterialTheme.colorScheme.error
                 )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Ova akcija će TRAJNO obrisati:",
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Divider()
+
+                    if (allTransactions.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("• Sve transakcije")
+                            Text(
+                                "${allTransactions.size}",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
+                    if (allGoals.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("• Sve ciljeve")
+                            Text(
+                                "${allGoals.size}",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
+                    Divider()
+
+                    Text(
+                        "Kategorije ostaju (default podaci).",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        "⚠ Ovo se NE MOŽE poništiti!",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             },
             confirmButton = {
                 Button(
@@ -290,18 +371,24 @@ fun DevSettingsScreen(
                                 goalViewModel.deleteGoal(goal)
                             }
                             showDeleteDialog = false
-                            showSuccessMessage = "🗑 Svi podaci obrisani"
+                            showSuccessMessage = "🗑 Svi podaci uspešno obrisani"
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text("DA, Obriši SVE")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                OutlinedButton(onClick = { showDeleteDialog = false }) {
                     Text("Otkaži")
                 }
             }

@@ -1,47 +1,17 @@
 package com.example.smartfinance.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,7 +23,7 @@ import com.example.smartfinance.ui.theme.IncomeGreen
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
 
 /**
- * Kompletan prikaz svih transakcija sa Edit i Delete
+ * Kompletan prikaz svih transakcija sa Delete
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,16 +80,51 @@ fun TransactionsListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    Text(
-                        text = "Ukupno: ${transactions.size} transakcija",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Ukupno transakcija",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = "${transactions.size}",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "Prihodi: ${transactions.count { it.type == "income" }}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = IncomeGreen
+                                )
+                                Text(
+                                    text = "Rashodi: ${transactions.count { it.type == "expense" }}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = ExpenseRed
+                                )
+                            }
+                        }
+                    }
                 }
 
                 items(transactions) { transaction ->
                     val category = categories.find { it.id == transaction.categoryId }
-                    TransactionItemWithActions(
+                    TransactionListItem(
                         transaction = transaction,
                         categoryName = category?.name ?: "Nepoznato",
                         categoryIcon = category?.icon ?: "📦",
@@ -134,9 +139,33 @@ fun TransactionsListScreen(
     transactionToDelete?.let { transaction ->
         AlertDialog(
             onDismissRequest = { transactionToDelete = null },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
             title = { Text("Obriši Transakciju?") },
             text = {
-                Text("Da li sigurno želiš da obrišeš:\n\n${transaction.description}\n${formatCurrency(transaction.amount)}")
+                Column {
+                    Text("Da li sigurno želiš da obrišeš:")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = transaction.description,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = formatCurrency(transaction.amount),
+                        color = if (transaction.type == "income") IncomeGreen else ExpenseRed,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = formatDate(transaction.date),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
             },
             confirmButton = {
                 Button(
@@ -159,9 +188,10 @@ fun TransactionsListScreen(
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionItemWithActions(
+fun TransactionListItem(
     transaction: Transaction,
     categoryName: String,
     categoryIcon: String,
@@ -187,8 +217,10 @@ fun TransactionItemWithActions(
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = categoryIcon, fontSize = 24.sp)
@@ -225,7 +257,15 @@ fun TransactionItemWithActions(
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
-                text = { Text("🗑 Obriši", color = MaterialTheme.colorScheme.error) },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "🗑", fontSize = 18.sp)
+                        Text("Obriši")
+                    }
+                },
                 onClick = {
                     showMenu = false
                     onDelete()
@@ -233,4 +273,16 @@ fun TransactionItemWithActions(
             )
         }
     }
+}
+
+// Helper funkcije (koriste se iz HomeScreen.kt)
+fun formatCurrency(amount: Double): String {
+    val formatter = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("sr", "RS"))
+    formatter.maximumFractionDigits = 0
+    return formatter.format(amount).replace("RSD", "din")
+}
+
+fun formatDate(timestamp: Long): String {
+    val sdf = java.text.SimpleDateFormat("dd.MM.yyyy", java.util.Locale("sr", "RS"))
+    return sdf.format(java.util.Date(timestamp))
 }

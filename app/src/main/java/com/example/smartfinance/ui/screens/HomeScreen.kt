@@ -1,20 +1,50 @@
 package com.example.smartfinance.ui.screens
 
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import com.example.smartfinance.util.formatCurrency
+import com.example.smartfinance.util.formatDate
 
+import Screen
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,34 +53,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.smartfinance.data.model.Transaction
-import Screen
+import com.example.smartfinance.ui.components.BottomNavBar
 import com.example.smartfinance.ui.theme.ExpenseRed
 import com.example.smartfinance.ui.theme.IncomeGreen
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
-import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
-import androidx.compose.material3.TextButton
-
-import com.example.smartfinance.ui.components.BottomNavBar
-
-/**
- * Home/Dashboard ekran - glavni ekran aplikacije
- * Prikazuje balans, poslednje transakcije, i quick actions
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel
 ) {
-    // Collect state from ViewModel
     val balance by viewModel.balance.collectAsState()
     val totalIncome by viewModel.totalIncome.collectAsState()
     val totalExpense by viewModel.totalExpense.collectAsState()
     val transactions by viewModel.allTransactions.collectAsState()
     val categories by viewModel.allCategories.collectAsState()
+
+    var transactionToDelete by remember { mutableStateOf<Transaction?>(null) }
 
     Scaffold(
         topBar = {
@@ -62,7 +82,6 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    // Dev Settings Button (za dodavanje test podataka)
                     IconButton(
                         onClick = { navController.navigate(Screen.DevSettings.route) }
                     ) {
@@ -100,7 +119,6 @@ fun HomeScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Balance Card
             item {
                 BalanceCard(
                     balance = balance,
@@ -109,19 +127,23 @@ fun HomeScreen(
                 )
             }
 
-            // Recent Transactions Header
             item {
-                Text(
-                    text = "Poslednje transakcije",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                TextButton(onClick = { navController.navigate(Screen.Transactions.route) }) {
-                    Text("Vidi sve →")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Poslednje transakcije",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    TextButton(onClick = { navController.navigate(Screen.Transactions.route) }) {
+                        Text("Vidi sve →")
+                    }
                 }
             }
 
-            // Transaction List
             if (transactions.isEmpty()) {
                 item {
                     EmptyState()
@@ -129,28 +151,65 @@ fun HomeScreen(
             } else {
                 items(transactions.take(10)) { transaction ->
                     val category = categories.find { it.id == transaction.categoryId }
-                    TransactionItem(
+                    SimpleTransactionItem(
                         transaction = transaction,
                         categoryName = category?.name ?: "Nepoznato",
                         categoryIcon = category?.icon ?: "📦",
-                        onDelete = {
-                            // Implementacija brisanja - dodaj ViewModel metodu
-                            // Za sada samo placeholder
-                        },
-                        onEdit = {
-                            // Implementacija edit-a - navigacija na edit screen
-                            // Za sada placeholder
-                        }
+                        onDelete = { transactionToDelete = transaction }
                     )
                 }
             }
         }
+
+        transactionToDelete?.let { transaction ->
+            AlertDialog(
+                onDismissRequest = { transactionToDelete = null },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
+                title = { Text("Obriši Transakciju?") },
+                text = {
+                    Column {
+                        Text("Da li sigurno želiš da obrišeš:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = transaction.description,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = formatCurrency(transaction.amount),
+                            color = if (transaction.type == "income") IncomeGreen else ExpenseRed,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteTransaction(transaction)
+                            transactionToDelete = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Obriši")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { transactionToDelete = null }) {
+                        Text("Otkaži")
+                    }
+                }
+            )
+        }
     }
 }
 
-/**
- * Kartica sa balansom i prihodima/rashodima
- */
 @Composable
 fun BalanceCard(
     balance: Double,
@@ -190,7 +249,6 @@ fun BalanceCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Income
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Prihodi",
@@ -205,7 +263,6 @@ fun BalanceCard(
                     )
                 }
 
-                // Expense
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Rashodi",
@@ -224,17 +281,13 @@ fun BalanceCard(
     }
 }
 
-/**
- * Item za pojedinačnu transakciju u listi
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TransactionItem(
+fun SimpleTransactionItem(
     transaction: Transaction,
     categoryName: String,
     categoryIcon: String,
-    onDelete: () -> Unit = {},
-    onEdit: () -> Unit = {}
+    onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -245,7 +298,7 @@ fun TransactionItem(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = { showMenu = true }  // ← Long press menu
+        onClick = { showMenu = true }
     ) {
         Row(
             modifier = Modifier
@@ -253,7 +306,6 @@ fun TransactionItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Category Icon
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -271,7 +323,6 @@ fun TransactionItem(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Transaction Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.description,
@@ -285,7 +336,6 @@ fun TransactionItem(
                 )
             }
 
-            // Amount
             Text(
                 text = if (transaction.type == "income")
                     "+${formatCurrency(transaction.amount)}"
@@ -297,20 +347,20 @@ fun TransactionItem(
             )
         }
 
-        // Dropdown Menu
         DropdownMenu(
             expanded = showMenu,
             onDismissRequest = { showMenu = false }
         ) {
             DropdownMenuItem(
-                text = { Text("✏ Izmeni") },
-                onClick = {
-                    showMenu = false
-                    onEdit()
-                }
-            )
-            DropdownMenuItem(
-                text = { Text("🗑 Obriši", color = MaterialTheme.colorScheme.error) },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "🗑", fontSize = 18.sp)
+                        Text("Obriši")
+                    }
+                },
                 onClick = {
                     showMenu = false
                     onDelete()
@@ -320,9 +370,6 @@ fun TransactionItem(
     }
 }
 
-/**
- * Empty state kada nema transakcija
- */
 @Composable
 fun EmptyState() {
     Column(
@@ -347,18 +394,4 @@ fun EmptyState() {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     }
-}
-
-/**
- * Helper funkcije za formatiranje
- */
-fun formatCurrency(amount: Double): String {
-    val formatter = NumberFormat.getCurrencyInstance(Locale("sr", "RS"))
-    formatter.maximumFractionDigits = 0
-    return formatter.format(amount).replace("RSD", "RSD")
-}
-
-fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("dd.MM.yyyy", Locale("sr", "RS"))
-    return sdf.format(Date(timestamp))
 }

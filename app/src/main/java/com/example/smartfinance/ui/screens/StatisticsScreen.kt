@@ -1,13 +1,26 @@
 package com.example.smartfinance.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,10 +32,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.smartfinance.ui.theme.*
-import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
-
 import com.example.smartfinance.ui.components.BottomNavBar
+import com.example.smartfinance.ui.theme.CategoryBlue
+import com.example.smartfinance.ui.theme.CategoryCyan
+import com.example.smartfinance.ui.theme.CategoryOrange
+import com.example.smartfinance.ui.theme.CategoryPink
+import com.example.smartfinance.ui.theme.CategoryPurple
+import com.example.smartfinance.ui.theme.CategoryYellow
+import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 
 /**
  * Statistics ekran - prikazuje grafikone i analize
@@ -33,30 +50,25 @@ fun StatisticsScreen(
     navController: NavController,
     viewModel: StatisticsViewModel
 ) {
-    // Collect state
     val expensesByCategory by viewModel.expensesByCategory.collectAsState()
     val monthlyExpenses by viewModel.monthlyExpenses.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Statistika") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Nazad"
-                        )
-                    }
+                title = {
+                    Text(
+                        text = "Statistika",
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    titleContentColor = Color.White
                 )
             )
         },
-        bottomBar = { BottomNavBar(navController = navController) },
+        bottomBar = { BottomNavBar(navController = navController) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -65,7 +77,6 @@ fun StatisticsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Rashodi po kategorijama
             item {
                 Text(
                     text = "Rashodi po Kategorijama",
@@ -84,7 +95,6 @@ fun StatisticsScreen(
                 }
             }
 
-            // Mesečni trendovi
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -107,9 +117,6 @@ fun StatisticsScreen(
     }
 }
 
-/**
- * Kartica sa rashodima po kategorijama (Simplified bar chart)
- */
 @Composable
 fun CategoryExpensesCard(expenses: Map<String, Double>) {
     Card(
@@ -142,9 +149,6 @@ fun CategoryExpensesCard(expenses: Map<String, Double>) {
     }
 }
 
-/**
- * Bar za pojedinačnu kategoriju
- */
 @Composable
 fun CategoryBar(
     categoryName: String,
@@ -172,7 +176,6 @@ fun CategoryBar(
             )
         }
 
-        // Progress bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -191,9 +194,6 @@ fun CategoryBar(
     }
 }
 
-/**
- * Kartica sa mesečnim trendovima
- */
 @Composable
 fun MonthlyTrendsCard(monthlyData: Map<String, Double>) {
     Card(
@@ -210,7 +210,6 @@ fun MonthlyTrendsCard(monthlyData: Map<String, Double>) {
         ) {
             val maxValue = monthlyData.values.maxOrNull() ?: 1.0
 
-            // Konvertuj u listu i uzmi poslednjih 6
             monthlyData.entries.toList().takeLast(6).forEach { entry ->
                 MonthlyBar(
                     monthLabel = entry.key,
@@ -222,9 +221,6 @@ fun MonthlyTrendsCard(monthlyData: Map<String, Double>) {
     }
 }
 
-/**
- * Bar za mesečne podatke
- */
 @Composable
 fun MonthlyBar(
     monthLabel: String,
@@ -268,9 +264,6 @@ fun MonthlyBar(
     }
 }
 
-/**
- * Empty state za statistiku
- */
 @Composable
 fun EmptyStatisticsCard() {
     Card(

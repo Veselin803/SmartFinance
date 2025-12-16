@@ -1,7 +1,18 @@
 package com.example.smartfinance.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,8 +20,26 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,10 +52,6 @@ import androidx.navigation.NavController
 import com.example.smartfinance.data.model.Goal
 import com.example.smartfinance.ui.components.BottomNavBar
 import com.example.smartfinance.ui.viewmodel.GoalViewModel
-import java.text.SimpleDateFormat
-import java.util.*
-
-import androidx.compose.foundation.clickable
 
 /**
  * Goals ekran - praćenje i dodavanje ciljeva štednje
@@ -37,7 +62,6 @@ fun GoalsScreen(
     navController: NavController,
     viewModel: GoalViewModel
 ) {
-    // State
     val goals by viewModel.allGoals.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -71,7 +95,6 @@ fun GoalsScreen(
         }
     ) { paddingValues ->
         if (goals.isEmpty()) {
-            // Empty state
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -94,7 +117,6 @@ fun GoalsScreen(
                 )
             }
         } else {
-            // Goals list
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -115,7 +137,6 @@ fun GoalsScreen(
         }
     }
 
-    // Add Goal Dialog
     if (showAddDialog) {
         AddGoalDialog(
             onDismiss = { showAddDialog = false },
@@ -131,9 +152,6 @@ fun GoalsScreen(
     }
 }
 
-/**
- * Kartica za pojedinačan cilj
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalCard(
@@ -162,7 +180,6 @@ fun GoalCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,7 +206,6 @@ fun GoalCard(
                 }
             }
 
-            // Progress
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -208,7 +224,6 @@ fun GoalCard(
                     )
                 }
 
-                // Progress bar
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -232,7 +247,6 @@ fun GoalCard(
                 )
             }
 
-            // Deadline (if exists)
             goal.deadline?.let { deadline ->
                 Text(
                     text = "Rok: ${formatDate(deadline)}",
@@ -243,7 +257,6 @@ fun GoalCard(
         }
     }
 
-    // Edit Progress Dialog
     if (showEditDialog) {
         EditGoalProgressDialog(
             goal = goal,
@@ -256,9 +269,6 @@ fun GoalCard(
     }
 }
 
-/**
- * Dialog za dodavanje novog cilja
- */
 @Composable
 fun AddGoalDialog(
     onDismiss: () -> Unit,
@@ -277,7 +287,6 @@ fun AddGoalDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Name input
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -287,7 +296,6 @@ fun AddGoalDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Target amount input
                 OutlinedTextField(
                     value = targetAmount,
                     onValueChange = { targetAmount = it },
@@ -298,7 +306,6 @@ fun AddGoalDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Icon selector
                 Text(
                     text = "Izaberi ikonu:",
                     style = MaterialTheme.typography.bodyMedium
@@ -319,13 +326,13 @@ fun AddGoalDialog(
                                     else
                                         MaterialTheme.colorScheme.surface
                                 )
+                                .clickable { selectedIcon = icon }
                                 .padding(8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = icon,
-                                fontSize = 24.sp,
-                                modifier = Modifier.clickable { selectedIcon = icon }
+                                fontSize = 24.sp
                             )
                         }
                     }
@@ -353,9 +360,6 @@ fun AddGoalDialog(
     )
 }
 
-/**
- * Dialog za ažuriranje napretka cilja
- */
 @Composable
 fun EditGoalProgressDialog(
     goal: Goal,

@@ -8,7 +8,11 @@ import com.example.smartfinance.data.model.Transaction
 import com.example.smartfinance.data.repository.CategoryRepository
 import com.example.smartfinance.data.repository.GoalRepository
 import com.example.smartfinance.data.repository.TransactionRepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -76,4 +80,13 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = 0.0
     )
+
+    /**
+     * Obriši transakciju - NOVO!
+     */
+    fun deleteTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            transactionRepository.deleteTransaction(transaction)
+        }
+    }
 }
