@@ -1,12 +1,14 @@
 package com.example.smartfinance.ui.navigation
 
-import Screen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.smartfinance.ui.screens.AddTransactionScreen
 import com.example.smartfinance.ui.screens.DevSettingsScreen
+import com.example.smartfinance.ui.screens.EditTransactionScreen
 import com.example.smartfinance.ui.screens.GoalsScreen
 import com.example.smartfinance.ui.screens.HomeScreen
 import com.example.smartfinance.ui.screens.SplashScreen
@@ -45,6 +47,22 @@ fun NavGraph(
                 navController = navController,
                 viewModel = transactionViewModel
             )
+        }
+
+        composable(
+            route = Screen.EditTransaction.route,
+            arguments = listOf(navArgument("transactionId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getInt("transactionId") ?: 0
+            val transaction = transactionViewModel.allTransactions.value.find { it.id == transactionId }
+
+            transaction?.let {
+                EditTransactionScreen(
+                    navController = navController,
+                    viewModel = transactionViewModel,
+                    transaction = it
+                )
+            }
         }
 
         composable(route = Screen.Statistics.route) {

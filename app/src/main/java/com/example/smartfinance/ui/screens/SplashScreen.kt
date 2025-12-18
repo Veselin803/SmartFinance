@@ -1,6 +1,6 @@
 package com.example.smartfinance.ui.screens
 
-import Screen
+import com.example.smartfinance.ui.navigation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -1,6 +1,6 @@
 package com.example.smartfinance.ui.components
 
-import Screen
+import com.example.smartfinance.ui.navigation.Screen
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Flag

@@ -216,7 +216,7 @@ fun DevSettingsScreen(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("🗑 Obriši SVE Podatke")
+                Text("Obriši SVE Podatke")
             }
 
             if (allTransactions.isEmpty() && allGoals.isEmpty()) {
@@ -371,7 +371,7 @@ fun DevSettingsScreen(
                                 goalViewModel.deleteGoal(goal)
                             }
                             showDeleteDialog = false
-                            showSuccessMessage = "🗑 Svi podaci uspešno obrisani"
+                            showSuccessMessage = "Svi podaci uspešno obrisani"
                         }
                     },
                     colors = ButtonDefaults.buttonColors(

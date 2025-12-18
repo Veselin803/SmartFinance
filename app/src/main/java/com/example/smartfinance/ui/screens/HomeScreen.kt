@@ -1,9 +1,5 @@
 package com.example.smartfinance.ui.screens
 
-import com.example.smartfinance.util.formatCurrency
-import com.example.smartfinance.util.formatDate
-
-import Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,9 +50,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.smartfinance.data.model.Transaction
 import com.example.smartfinance.ui.components.BottomNavBar
+import com.example.smartfinance.ui.navigation.Screen
 import com.example.smartfinance.ui.theme.ExpenseRed
 import com.example.smartfinance.ui.theme.IncomeGreen
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
+import com.example.smartfinance.util.formatCurrency
+import com.example.smartfinance.util.formatDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +154,10 @@ fun HomeScreen(
                         transaction = transaction,
                         categoryName = category?.name ?: "Nepoznato",
                         categoryIcon = category?.icon ?: "📦",
-                        onDelete = { transactionToDelete = transaction }
+                        onDelete = { transactionToDelete = transaction },
+                        onEdit = {
+                            navController.navigate(Screen.EditTransaction.createRoute(transaction.id))
+                        }
                     )
                 }
             }
@@ -287,7 +289,8 @@ fun SimpleTransactionItem(
     transaction: Transaction,
     categoryName: String,
     categoryIcon: String,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit  // ← DODAJ
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -357,7 +360,20 @@ fun SimpleTransactionItem(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = "🗑", fontSize = 18.sp)
+                        Text("Izmeni")
+                    }
+                },
+                onClick = {
+                    showMenu = false
+                    onEdit()  // ← DODAJ onEdit callback
+                }
+            )
+            DropdownMenuItem(
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text("Obriši")
                     }
                 },
