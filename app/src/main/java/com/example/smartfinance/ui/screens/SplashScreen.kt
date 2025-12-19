@@ -1,6 +1,5 @@
 package com.example.smartfinance.ui.screens
 
-import com.example.smartfinance.ui.navigation.Screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.smartfinance.ui.navigation.Screen
 import kotlinx.coroutines.delay
 
 /**
@@ -26,7 +26,7 @@ fun SplashScreen(navController: NavController) {
 
     LaunchedEffect(key1 = true) {
         delay(2000) // 2 sekunde
-        navController.navigate(Screen.Home.route) {
+        navController.navigate(Screen.Login.route) {  // ← PROMENI na Login
             popUpTo(Screen.Splash.route) { inclusive = true }
         }
     }

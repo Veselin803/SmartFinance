@@ -18,6 +18,9 @@ import com.example.smartfinance.ui.viewmodel.GoalViewModel
 import com.example.smartfinance.ui.viewmodel.HomeViewModel
 import com.example.smartfinance.ui.viewmodel.StatisticsViewModel
 import com.example.smartfinance.ui.viewmodel.TransactionViewModel
+import com.example.smartfinance.ui.screens.*
+import com.example.smartfinance.ui.screens.LoginScreen
+import com.example.smartfinance.ui.screens.RegisterScreen
 
 @Composable
 fun NavGraph(
@@ -33,6 +36,14 @@ fun NavGraph(
     ) {
         composable(route = Screen.Splash.route) {
             SplashScreen(navController = navController)
+        }
+
+        composable(route = Screen.Login.route) {
+            LoginScreen(navController = navController)
+        }
+
+        composable(route = Screen.Register.route) {
+            RegisterScreen(navController = navController)
         }
 
         composable(route = Screen.Home.route) {
